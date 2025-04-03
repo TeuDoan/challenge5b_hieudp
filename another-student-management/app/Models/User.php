@@ -26,6 +26,17 @@ class User extends Authenticatable
         'password',
     ];
 
+    public function receivedMessages()
+    {
+        return $this->hasMany(Messages::class, 'recipient_uuid', 'uuid');
+    }
+
+    //Relationship for messages sent by this user
+    public function sentMessages()
+    {
+        return $this->hasMany(Messages::class, 'sender_uuid', 'uuid');
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *

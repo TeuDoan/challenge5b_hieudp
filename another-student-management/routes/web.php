@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 
@@ -12,16 +13,32 @@ Route::get('/about', function () {
     return view('about');
 })->name('about');
 
-//Dashboard page
-Route::get('/dashboard', [UserController::class,'index'])->name('dashboard.index');
+Route::middleware('guest')->group(function () {
+    //Login page
+    Route::get('/login', [AuthController::class, 'showLogin'])->name('show.login');
 
-//profile page
-Route::get('/profile/{uuid}', [UserController::class,'show'])->name('profile.show');
+    //Login action
+    Route::post('/login', [AuthController::class, 'login'])->name('login');
+});
 
-//Edit profile
-Route::get('/profile/{uuid}/edit', function ($uuid) {
-    return view('profile.edit', ["uuid" => $uuid]);
-})->name('profile.edit');
+
+
+
+Route::middleware('auth')->group(function () {
+
+    //Dashboard page
+    Route::get('/dashboard', [UserController::class, 'index'])->name('dashboard.index');
+
+    //profile page
+    Route::get('/profile/{uuid}', [UserController::class, 'show'])->name('profile.show');
+
+    //show Edit profile page
+    Route::get('/profile/{uuid}/edit', [UserController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile/{uuid}', [UserController::class, 'update'])->name('profile.update');
+    
+    //Logout
+    Route::post('/logout', [AuthController::class, 'logout'])->name(name: 'logout');
+});
 
 //homework assignments
 
