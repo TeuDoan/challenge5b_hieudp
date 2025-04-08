@@ -13,7 +13,7 @@ class Messages extends Model
 
     protected $fillable = [
         'sender_uuid',
-        'recipent_uuid',
+        'recipient_uuid',
         'message'
     ];
 

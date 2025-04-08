@@ -63,58 +63,60 @@ class UserController extends Controller
     public function update(Request $request, $uuid)
     {
         $user = User::where('uuid', $uuid)->firstOrFail();
+        $isTeacher = session(key: 'is_teacher'); // Returns 1 or 0
+        $isOwner = Auth::check() && Auth::user()->uuid === $uuid;
 
         // Ensure only the owner can update their profile
-        if (Auth::user()->uuid !== $user->uuid) {
-            abort(403, 'You can only edit your own profile.');
+        // Ensure only the owner or teacher can edit their profile
+        if (!$isOwner && !$isTeacher) {
+            abort(403, 'Only Teacher or Profile Owner can Edit!');
         }
 
-        // Define validation rules
+        // Validation rules
         $rules = [
             'email' => 'required|email|unique:users,email,' . $user->id,
             'password' => 'nullable|string|min:8',
-            'profile_picture' => 'nullable|image|max:2048', // 2MB max
+            'profile_picture' => 'nullable|image|max:2048',
             'phonenumber' => 'nullable|string|max:15',
         ];
 
-        // Add teacher-only fields if the user is a teacher
         if ($user->is_teacher) {
             $rules['fullname'] = 'required|string|max:255';
             $rules['username'] = 'required|string|max:255|unique:users,username,' . $user->id;
         }
 
-        // Validate the request
         $validated = $request->validate($rules);
 
-        // Prepare data for update, excluding null values
+        // Prepare update data
         $updateData = [
             'email' => $validated['email'],
             'phonenumber' => $validated['phonenumber'] ?? $user->phonenumber,
         ];
 
-        // Update password only if provided
         if (!empty($validated['password'])) {
             $updateData['password'] = bcrypt($validated['password']);
         }
 
-        // Update teacher-only fields if applicable
         if ($user->is_teacher) {
             $updateData['fullname'] = $validated['fullname'];
             $updateData['username'] = $validated['username'];
         }
-
-        // Update the user
-        $user->update($updateData);
-
-        // Handle profile picture upload
+        
+        // Handle profile picture
         if ($request->hasFile('profile_picture')) {
-            $path = $request->file('profile_picture')->store('profiles', 'public');
-            $user->update(['profile_picture' => $path]);
+            $file = $request->file('profile_picture');
+            $filename = $user->uuid . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/img'), $filename);
+
+            $updateData['profile_picture'] = $filename;
         }
 
-        // Redirect with success message
+        // Final update
+        $user->update($updateData);
+
         return redirect()->route('profile.show', $user->uuid)->with('success', 'Profile updated successfully!');
     }
+
     public function store()
     {
 

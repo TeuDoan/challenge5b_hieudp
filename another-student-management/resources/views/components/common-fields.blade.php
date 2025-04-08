@@ -15,6 +15,7 @@
         <span class="text-red-500 text-sm">{{ $message }}</span>
     @enderror
 </div>
+<img src="{{ asset('uploads/img/' . ($user->profile_picture ?? 'default.png')) }}" alt="Profile Picture" class="profile-picture">
 
 <div class="mb-4">
     <label for="profile_picture" class="block text-sm font-medium text-gray-700">Profile Picture</label>

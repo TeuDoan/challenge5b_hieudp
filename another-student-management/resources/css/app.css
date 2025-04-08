@@ -12,3 +12,6 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+.btn {
+    @apply bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-4 rounded;
+}

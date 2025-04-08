@@ -24,6 +24,8 @@ class User extends Authenticatable
         'email',
         'fullname',
         'password',
+        'uuid',
+        'profile_picture'
     ];
 
     public function receivedMessages()
